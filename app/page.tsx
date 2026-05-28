@@ -25,6 +25,7 @@ type LatestMeasurement = {
   device_time: string;
   received_at: string;
   noise_dba: number | null;
+  pm1_ugm3: number | null;
   pm25_ugm3: number | null;
   pm10_ugm3: number | null;
   temperature_c: number | null;
@@ -36,6 +37,7 @@ type Measurement = {
   station_id: string;
   device_time: string;
   noise_dba: number | null;
+    pm1_ugm3: number | null;
   pm25_ugm3: number | null;
   pm10_ugm3: number | null;
   temperature_c: number | null;
@@ -45,13 +47,13 @@ type DailySummary = {
   station_id: string;
   day: string;
   avg_noise_dba: number | null;
+  avg_pm1_ugm3: number | null;
   avg_pm25_ugm3: number | null;
   avg_pm10_ugm3: number | null;
   sample_count: number;
 };
 
-type MetricKey = "noise_dba" | "pm25_ugm3" | "pm10_ugm3" | "temperature_c";
-
+type MetricKey = "noise_dba" | "pm1_ugm3" | "pm25_ugm3" | "pm10_ugm3" | "temperature_c";
 const metrics: Record<
   MetricKey,
   { label: string; unit: string; latestKey: keyof LatestMeasurement; dailyKey?: keyof DailySummary; color: string }
@@ -62,6 +64,13 @@ const metrics: Record<
     latestKey: "noise_dba",
     dailyKey: "avg_noise_dba",
     color: "#16745f",
+  },
+    pm1_ugm3: {
+    label: "PM1",
+    unit: "ug/m3",
+    latestKey: "pm1_ugm3",
+    dailyKey: "avg_pm1_ugm3",
+    color: "#0f766e",
   },
   pm25_ugm3: {
     label: "PM2.5",
@@ -137,7 +146,7 @@ export default function Home() {
         .order("station_id", { ascending: true }),
       supabase
         .from("measurements")
-        .select("station_id, device_time, noise_dba, pm25_ugm3, pm10_ugm3, temperature_c")
+        .select("station_id, device_time, noise_dba, pm1_ugm3, pm25_ugm3, pm10_ugm3, temperature_c")    
         .gte("device_time", since)
         .order("device_time", { ascending: true })
         .limit(1000),
@@ -399,6 +408,7 @@ function StationCard({ station }: { station: LatestMeasurement }) {
       <div className="reading-grid">
         <Reading label="Бучава" value={`${formatNumber(station.noise_dba)} dBA`} icon={<Activity size={16} />} />
         <Reading label="PM2.5" value={`${formatNumber(station.pm25_ugm3)} ug/m3`} icon={<Activity size={16} />} />
+        <Reading label="PM1" value={`${formatNumber(station.pm1_ugm3)} ug/m3`} icon={<Activity size={16} />} />
         <Reading label="PM10" value={`${formatNumber(station.pm10_ugm3)} ug/m3`} icon={<Activity size={16} />} />
         <Reading label="Температура" value={`${formatNumber(station.temperature_c)} C`} icon={<Thermometer size={16} />} />
       </div>
